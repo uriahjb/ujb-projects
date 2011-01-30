@@ -1,0 +1,2 @@
+%% A function with the purpose of plotting the PUMA260 arm
+function puma_viz(

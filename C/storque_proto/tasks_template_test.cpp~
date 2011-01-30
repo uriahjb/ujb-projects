@@ -1,0 +1,12 @@
+/* Tester for tasks template */
+
+#include "task_template.h"
+#include <iostream>
+
+using namespace std;
+
+TaskTemplate tasktemp;
+
+int main(int argc, char *argv[]){
+  cout << tasktemp.property_list.a << endl;
+}

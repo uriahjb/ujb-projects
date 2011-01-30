@@ -1,0 +1,7 @@
+/* Task Template class. Contains all major methods of a task, including 
+   properties/data.
+*/
+
+#ifndef #task_template
+#define #task_template
+

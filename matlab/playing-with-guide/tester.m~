@@ -1,0 +1,10 @@
+%% Runs the testing guide GUI
+
+testing();
+
+f1 = figure();
+    X = [0:0.1:1.0];
+    Y = [0:0.1:1.0];
+    plot(X, Y);
+
+varargout = testing_OutputFcn(
