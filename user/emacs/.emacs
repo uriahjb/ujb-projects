@@ -1,0 +1,157 @@
+;; Emacs load-path
+(setq load-path (cons "~/emacs" load-path))
+
+;;Changing tab indentation
+(setq c-basic-offset 2)
+
+;;Save current desktop
+(desktop-save-mode t)
+
+;; Turn on line numbering
+;;(require 'setnu)
+;;(setnu-mode 1)				  
+(line-number-mode 1)
+(global-linum-mode 1)	       
+
+;; Remove start-up message
+(setq inhibit-startup-message t)
+
+;; Init interactive window resizing "C-x +" allows for temp resizing
+(require 'bw-interactive)
+(global-set-key[(control x)?+]'bw-start-resize-mode)
+ 
+;;(set-face-attribute 'default nil :height 80)
+(defun fontify-frame (frame)
+ (set-frame-parameter frame 'font "Monospace-10"))
+;; Fontify current frame
+(fontify-frame nil)
+;; Fontify future frames
+(push 'fontify-frame after-make-frame-functions)
+
+(setq initial-frame-alist '((top . 10) (left . 30)))
+
+;;-------------------------------------------------------
+;; Map M-x close-all-buffers RET as a function
+(defun close-all-buffers ()
+  (interactive)
+  (mapc 'kill-buffer (buffer-list)))
+(global-set-key "\C-cx" 'close-all-buffers)
+
+;;-------------------------------------------------------
+;; Some sweet transparency
+(defun djcb-opacity-modify (&optional dec)
+  "modify the transparency of the emacs frame; if DEC is t,
+   decrease the transparency, otherwise increase it in 10%-steps"
+   (let* ((alpha-or-nil (frame-parameter nil 'alpha)) ; nil before setting
+    (oldalpha (if alpha-or-nil alpha-or-nil 100))
+    (newalpha (if dec (- oldalpha 5) (+ oldalpha 5))))
+     (when (and (>= newalpha frame-alpha-lower-limit) (<= newalpha 100))
+       (modify-frame-parameters nil (list (cons 'alpha newalpha))))))
+
+;; C-8 will increase opacity (== decrease transparency)
+;; C-9 will decrease opactiy (== increase transparency)
+;; C-0 will return the state to normal
+(global-set-key (kbd "C-8") '(lambda()(interactive)(djcb-opacity-modify)))
+(global-set-key (kbd "C-9") '(lambda()(interactive)(djcb-opacity-modify t)))
+(global-set-key (kbd "C-0") '(lambda()(interactive)(modify-frame-parameters nil '((alpha . 100)))))
+
+;;-------------------------------------------------------
+;; Load CEDET.
+;; See cedet/common/cedet.info for configuration details.
+(load-file "~/cedet-1.0/common/cedet.el")
+(require 'semantic-ia)
+(require 'semantic-gcc)
+
+;; Enable EDE (Project Management) features
+(global-ede-mode 1)
+
+;; Enable EDE for a pre-existing C++ project
+;; (ede-cpp-root-project "NAME" :file "~/myproject/Makefile")
+
+
+;; Enabling Semantic (code-parsing, smart completion) features
+;; Select one of the following:
+
+;; * This enables the database and idle reparse engines
+(semantic-load-enable-minimum-features)
+
+;; * This enables some tools useful for coding, such as summary mode
+;;   imenu support, and the semantic navigator
+(semantic-load-enable-code-helpers)
+
+;; * This enables even more coding tools such as intellisense mode
+;;   decoration mode, and stickyfunc mode (plus regular code helpers)
+;; (semantic-load-enable-gaudy-code-helpers)
+
+;; * This enables the use of Exuberent ctags if you have it installed.
+;;   If you use C++ templates or boost, you should NOT enable it.
+;; (semantic-load-enable-all-exuberent-ctags-support)
+;;   Or, use one of these two types of support.
+;;   Add support for new languges only via ctags.
+;; (semantic-load-enable-primary-exuberent-ctags-support)
+;;   Add support for using ctags as a backup parser.
+;; (semantic-load-enable-secondary-exuberent-ctags-support)
+ 
+;; Enable SRecode (Template management) minor-mode.
+;; (global-srecode-minor-mode 1)
+
+(setq default-frame-alist
+      '((top . 0)(left . 400)
+	(width . 200)(height . 80)
+        ;; These definitions hold true inside OSX Terminal Emacs
+	(cursor-color . "Grey")   
+	(cursor-typte . box)
+))
+
+;;-------------------------------------------------------
+;; Set up color theme library
+(require 'color-theme)
+(color-theme-initialize)
+
+;;-------------------------------------------------------
+;; Custom Color Theme, Uriah
+(defun color-theme-uriah ()
+  "A custom color them by Uriah."
+  (interactive)
+  (color-theme-install
+   '(color-theme-uriah
+     ((background-color . "#2e3436")
+      (background-mode . dark)
+      (border-color . "#888a85")
+      (cursor-color . "#fce94f")
+      (foreground-color . "#eeeeec")
+      (mouse-color . "#8ae234"))
+     ((help-highlight-face . underline)
+      (ibuffer-dired-buffer-face . font-lock-function-name-face)
+      (ibuffer-help-buffer-face . font-lock-comment-face)
+      (ibuffer-hidden-buffer-face . font-lock-warning-face)
+      (ibuffer-occur-match-face . font-lock-warning-face)
+      (ibuffer-read-only-buffer-face . font-lock-type-face)
+      (ibuffer-special-buffer-face . font-lock-keyword-face)
+      (ibuffer-title-face . font-lock-type-face))
+     (border ((t (:background "#888e85"))))
+     (fringe ((t (:background "grey10"))))
+     (mode-line ((t (:foreground "#eeeeec" :background "#555753"))))
+     (region ((t (:background "#555753"))))
+     (font-lock-builtin-face ((t (:foreground "#729fcf"))))
+     (font-lock-comment-face ((t (:foreground "#888a85"))))
+     (font-lock-constant-face ((t (:foreground "#8ae234"))))
+     (font-lock-doc-face ((t (:foreground "888a85"))))
+     (font-lock-keyword-face ((t (:foreground "#729fcf" :bold t))))
+     (font-lock-string-face ((t (:foreground "ad7fa8" :italic t))))
+     (font-lock-type-face ((t (:foreground "8ae234" :bold t))))
+     (font-lock-variable-name-face ((t (:foreground "#eeeeec"))))
+     (font-lock-warning-face ((t (:bold t :foreground "#f57900"))))
+     (font-lock-function-name-face ((t (:foreground "#edd400" :bold t :italic t))))
+     (comint-highlight-input ((t (:italic t :bold t))))
+     (comint-highlight-prompt ((t (:foreground "#8ae234"))))
+     (isearch ((t (:background "#f57900" :foreground "#2e3436"))))
+     (isearch-lazy-highlight-face ((t (:foreground "#2e3436" :background "#e9b96e"))))
+     (show-paren-match-face ((t (:foreground "#729fcf" :background "#73d216"))))
+     (show-paren-mismatch-face ((t (:background "#ad7fa8" :foreground "#2e3436"))))
+     (minibuffer-prompt ((t (:foreground "#729fcf" :bold t))))
+     (info-xref ((t (:foreground "#729fcf"))))
+     (info-xref-visited ((t (:foreground "#ad7fa8"))))
+     )))
+(provide 'color-theme-uriah
+(color-theme-uriah)

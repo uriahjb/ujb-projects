@@ -83,18 +83,16 @@ classdef puma260 < handle
             end
 
             self.h.dimensions = [-reach reach -reach reach 0.0 reach];
-            self.h.magnitude = reach/8;
+            self.h.magnitude = reach/10;
 
-            if ~ishold,        
-                set(gcf, 'Position', [100, 100, 1000, 1000]);
-                %set(self.plot.f,'Renderer','OpenGL')
+            if ~ishold,  
                 % if current figure has hold on, then draw robot here
                 % otherwise, create a new figure
                 axis(self.h.dimensions);
             end
             xlabel('X')
             ylabel('Y')
-            zlabel('Z')          
+            zlabel('Z')
             set(gca, 'drawmode', 'fast');
             grid on
 
@@ -105,12 +103,12 @@ classdef puma260 < handle
             %% Draw a line that will then be modified to draw the entire robot
             self.h.robot = line('Color', 'black', ...
                                 'Linewidth', 4, ...
-                                'erasemode', 'normal');
+                                'erasemode', 'xor');
 
             %% Add a shadow because its cool
             self.h.shadow = line('Color', [.8 .8 .8], ...
                                  'Linewidth', 5, ...
-                                 'erasemode', 'normal');
+                                 'erasemode', 'xor');
 
             %% Add cylinders for each joint and axis center line
             for i = 1:length(L)
@@ -121,9 +119,7 @@ classdef puma260 < handle
 
                 % Add surface and color it
                 self.h.joint(i) = surface(xc, yc, zc);
-                set(self.h.joint(i), 'FaceColor',[.3 .3 .3], ...
-                                     'EdgeColor','none', ...
-                                     'erasemode', 'normal');
+                set(self.h.joint(i), 'FaceColor','blue','EdgeColor','none');
 
                 % Build matrix of coordinates for transformations
                 %  in animate_puma
@@ -145,34 +141,31 @@ classdef puma260 < handle
                              'zdata', [0; 0], ...
                              'color', 'blue', ...
                              'linestyle', '--', ...
-                             'linewidth', 2, ...
-                             'erasemode', 'normal');
+                             'erasemode', 'xor');
             
             self.h.ye = line('xdata', [0; 0], ...
                              'ydata', [0; 0], ...
                              'zdata', [0; 0], ...
-                             'color', 'red', ...
+                             'color', 'blue', ...
                              'linestyle', '--', ...
-                             'linewidth', 2, ...
-                             'erasemode', 'normal');
+                             'erasemode', 'xor');
                     
             self.h.ze = line('xdata', [0; 0], ...
                              'ydata', [0; 0], ...
                              'zdata', [0; 0], ...
-                             'color', 'green', ...
-                             'linestyle', '--', ...
-                             'linewidth', 2, ...
+                             'color', 'blue', ...
+                             'linestyle', '-', ...
                              'erasemode', 'xor');
                     
-            self.h.xet = text(0, 0, 'x', 'erasemode', 'normal');
-            self.h.yet = text(0, 0, 'y', 'erasemode', 'normal');
-            self.h.zet = text(0, 0, 'z', 'erasemode', 'normal');
+            self.h.xet = text(0, 0, 'x', 'erasemode', 'xor');
+            self.h.yet = text(0, 0, 'y', 'erasemode', 'xor');
+            self.h.zet = text(0, 0, 'z', 'erasemode', 'xor');
             
             %% Add in a end-effector path-line 'cause its rad
             self.h.pathline = line('Color', 'black', ...
                                    'Linewidth', 2, ...
                                    'linestyle', '--', ...
-                                   'erasemode', 'normal');
+                                   'erasemode', 'xor');
                 
         end
         
@@ -324,7 +317,6 @@ classdef puma260 < handle
             
             % And finally draw everything
             drawnow
-            
         end
         
         %% Animate for a set number of theta definitions
