@@ -1,0 +1,7 @@
+# Controlling a Hitech servo using pyserial, hopefully eventually wirelessly
+
+import serial
+
+class servoControl:
+    def __init__(self, com):
+        

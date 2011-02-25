@@ -1,0 +1,7 @@
+%% A quick tester function ...
+
+function test_ik(robot, x, y, z)
+    [t1, t2, t3, t4, t5, t6] = puma_ik(x, y, z);
+    plotrobot(puma,qz);
+    fkine(robot, [t1 t2 t3 t4 t5 t6])
+end

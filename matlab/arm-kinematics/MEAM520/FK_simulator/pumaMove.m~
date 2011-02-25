@@ -1,0 +1,45 @@
+function [ ] = pumaMove( th1,th2,th3,th4,th5,th6 )
+%PUMAPOS MOves the PUMA to the new configuration specified by the input
+%parameters. This function does not have the "change in joint angle" limits and
+%timestep constraints that the pumaServo function has.
+%   INPUTS:
+%    th1...th6 : Joint variables for the six DOF PUMA arm
+%
+    if(nargin ~=6)
+        error('Number of inputs must be equal to 6');
+    end
+    
+    if(~evalin('base','exist(''puma'',''var'')'))
+            error('PUMA has not been initialised. Run puma260.m first');
+    end 
+%% Joint Limits
+    th = [th1 th2 th3 th4 th5 th6];
+    lowlim = [-180 -75 -235 -580 -30 -215]; % LOwer limits of joints
+    uplim  = [110 240 60 40 200 295]; % Upper limits of joints
+    if(sum((th<deg2rad(lowlim))+(th>deg2rad(uplim)))~=0)
+        error('Joint limits exceeded. Check input angles');
+    end
+    
+    global puma;   
+    plot(puma,th);
+    
+    n = puma.n;
+    tran = puma.base;
+    L = puma.link;
+    epos = zeros(6,6); % 6 joints and [x,y,z] 
+    for i=1:n,
+        tran = tran * L{i}(th(i));
+        pos(i,:) = tran(1:3,4);
+    end
+	tran = tran * puma.tool;
+    epos = tran(1:3,4); % end-effector position;
+    %% Workspace limits - X has to be > -6 inches and Z has to be > 2 inches
+    if(epos(1) < -6*0.0254 || epos(3) < 2*0.0254) 
+        error('Workspace limits exceeded. Check the input angles');
+    end
+    hold on;
+    col = puma.ledcol;
+    plot3(epos(1),epos(2),epos(3),'Color',[col(1) col(2) col(3)],'*');
+    
+end
+
