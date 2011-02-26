@@ -67,7 +67,7 @@ class PropertyList {
   String list_name;
   int current_index;
   int num_properties;
-  int get_flag;
+  int get_request_flag;
   
   /* Declare property_list */
   property_t *property_list;
@@ -75,10 +75,11 @@ class PropertyList {
   /* Methods */
   PropertyList(int, String name);
   int Set(int index, int type, int length, void *data, char *name);
-  int Set(int index, int type, int length, void *data);
   int Set(int index, void *data);
-  String Get(int index);
+  String Get(int index, int verbose);
 
+  void SetFlag(int index);
+  int CheckFlag(int index);
 };
 
 #endif

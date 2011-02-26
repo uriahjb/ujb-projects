@@ -70,7 +70,7 @@ typedef struct console_rx_ {
   uint8_t index; 
   uint8_t cmd;
   uint8_t len;
-  uint8_t byte_in; // caps because byte is already taken ... lame
+  uint8_t byte_in;
   uint8_t data[16];
   uint8_t packet_received_flag;
   uint16_t chk;

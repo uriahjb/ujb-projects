@@ -34,7 +34,10 @@ enum type {
   Int,
   UInt,
   Word,
-  Long
+  Long,
+  ULong,
+  Float,
+  Str
 };
 
 /* ------------------------------------------------------------------------ */
@@ -72,10 +75,8 @@ class PropertyList {
   /* Methods */
   PropertyList(int, String name);
   int Set(int index, int type, int length, void *data, char *name);
-  int Set(int index, int type, int length, void *data);
   int Set(int index, void *data);
-  String Get(int index);
-  String Get();
+  String Get(int index, int verbose);
 
 };
 

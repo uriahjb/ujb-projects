@@ -137,8 +137,8 @@
 //#include <GPS_MTK.h>      // MediaTEK DIY Drones GPS. 
 #include <GPS_UBLOX.h>  // uBlox GPS
 
-#include <IOManager.h>
 #include <PropertyList.h>
+#include <IOManager.h>
 
 // EEPROM storage for user configurable values
 #include <EEPROM.h>
@@ -210,7 +210,7 @@ void setup()
   /* Test out IOManager / PropertyList */
   /* -------------------------------------------------------- */
   String output;  
-  IOManager IOManager(5);
+  IOManager.Init(5, &Serial);
   
     /* Testing PropertyList */
   PropertyList p(3, "Test");  
@@ -219,26 +219,33 @@ void setup()
   char b = 'b';
   
   p.Set(0, Int, 3, &a, "num"); //with name
-  p.Set(1, Char, 1, &b); // without name
+  ftdiPrintln(p.current_index);
+  p.Set(1, Char, 1, &b, "b"); // without name
+  ftdiPrintln(p.current_index);
+  p.SetFlag(0);
+  ftdiPrintln(p.CheckFlag(0));
+  p.SetFlag(1);
+  ftdiPrintln(p.CheckFlag(1));
   
   IOManager.Append(&p);
   
-  output = IOManager.Test(0, 0);
-  ftdiPrintln(output);
-  output = IOManager.Test(0, 1);
-  ftdiPrintln(output);
-  output = IOManager.Test(0, 2);
-  ftdiPrintln(output);
-  output = IOManager.Test(0, 3);
-  ftdiPrintln(output);
-  output = IOManager.Test(0, 4);
-  ftdiPrintln(output);
+  output = IOManager.Test(0, 0, 1);
+  output = IOManager.Test(0, 1, 1);
+  output = IOManager.Test(0, 2, 1);
+  output = IOManager.Test(0, 3, 1);
+  output = IOManager.Test(0, 4, 1);
   
-  output = IOManager.Test(1, 0);
-  ftdiPrintln(output);
-  output = IOManager.Test(1, 1);
-  ftdiPrintln(output);
+  output = IOManager.Test(1, 0, 0);
+  output = IOManager.Test(1, 1, 0);
   
+  ftdiPrintln(p.CheckFlag(0));
+  ftdiPrintln(p.CheckFlag(1));
+  /* 
+  String hello = String("hello");
+  ftdiPrintln(hello[0]);
+  ftdiPrintln(hello[1]);
+  ftdiPrintln(hello[2]);
+  */
 } 
 
 
@@ -256,11 +263,14 @@ void loop(){
     digitalWrite(LOOP_PIN, LOW);
   }
   
+  IOManager.Loop();
+  
+  /*
   Read_Ports();
   Read_Timers();
   Manage_Tasks();
   Write_Ports();
-  
+  */
 }   // End of void loop()
 
 // END of StorqueUAV.pde
