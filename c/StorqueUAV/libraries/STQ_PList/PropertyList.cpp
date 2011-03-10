@@ -45,7 +45,7 @@ PropertyList::PropertyList(int n, String name){
   property_list = (property_t*)malloc(n*sizeof(property_t));
   num_properties = n;
   list_name = name;
-  current_index = 0;
+  list_index = 0;
   get_request_flag = false;
   
   /* Initialize relevant property values */
@@ -68,7 +68,7 @@ int PropertyList::Set(int index, int type, int length, void *data, char *name){
 
   /* Check if property has been initialized */
   if (property_list[index].initialized == false){
-    ++current_index;
+    ++list_index;
     property_list[index].initialized = true;
   }
 
@@ -245,7 +245,7 @@ String PropertyList::Get(int index, int verbose){
      flag is set
 */
 void PropertyList::SetFlag(int index){
-  if (index < current_index){
+  if (index < list_index){
     property_list[index].flag = true;
     if (get_request_flag == false){
       get_request_flag = true;
@@ -256,10 +256,14 @@ void PropertyList::SetFlag(int index){
 
 /* Check get flag for a given property */
 int PropertyList::CheckFlag(int index){
-  if (index < current_index){
+  if (index < list_index){
     if (property_list[index].flag){
       return true;
     }
   }
   return false;
 };
+
+int PropertyList::Size(){
+  return list_index;
+}

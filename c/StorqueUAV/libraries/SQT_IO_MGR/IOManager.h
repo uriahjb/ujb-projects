@@ -60,7 +60,7 @@ class IOManager_Class {
 
   /* Low level transmit buffer ... uses String because its easier */
   unsigned int _tx_index;
-  unsigned int _tx_lock;
+  unsigned int _tx_locked;
   String _tx_buffer;
 
   /* Low level receive buffer, uses chars (uint8_t) for ease of use */
@@ -71,7 +71,7 @@ class IOManager_Class {
   char *_rx_buffer;
   
  public:
-  
+
   /* Property List Array ... currently with fixed number of propertylists */
   int plist_index;
   int plist_size;

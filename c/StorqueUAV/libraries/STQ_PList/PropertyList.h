@@ -65,7 +65,7 @@ class PropertyList {
   } property_t;
   
   String list_name;
-  int current_index;
+  int list_index;
   int num_properties;
   int get_request_flag;
   
@@ -80,6 +80,7 @@ class PropertyList {
 
   void SetFlag(int index);
   int CheckFlag(int index);
+  int Size();
 };
 
 #endif

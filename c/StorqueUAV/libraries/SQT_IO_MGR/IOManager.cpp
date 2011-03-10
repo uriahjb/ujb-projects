@@ -2,7 +2,7 @@
 /* (CPP)
    IO Manager:
      - Manages PropertyList Input and Output streams
-     - Has iterable array of property lists, enabling
+    - Has iterable array of property lists, enabling
        browsability of properties
      - Contains its own property list for timers and other IO settings
      - Has Timer based PropertyList Outputs
@@ -48,7 +48,7 @@
 	  get_flag
 */
 /* ----------------------------------------------------------------------------- */
-IOManager_Class::IOManager_Class(): io_manager_plist(7, "IOMgr"){};
+IOManager_Class::IOManager_Class(): io_manager_plist(7, "IOMgr") {};
 
 void IOManager_Class::Init(int num_lists, HardwareSerial *serialObj){
 
@@ -64,9 +64,13 @@ void IOManager_Class::Init(int num_lists, HardwareSerial *serialObj){
   _rx_buffer = rx_buffer;
   _rx_len = 0;
   
+  /* Set up transmit */
+  _tx_locked = false;
+  _tx_index = 0;
+  
 
   /* Allocate memory for plist_array */
-  plist_array = (PropertyList**)malloc(num_lists*sizeof(PropertyList));
+  plist_array = (PropertyList**)malloc(num_lists*sizeof(PropertyList*));
   plist_size = num_lists;
 
   /* Set IO Manager serial handle to assigned serial */     
@@ -184,8 +188,17 @@ void IOManager_Class::Receive(){
 /* ----------------------------------------------------------------------------- */
 /* Transmit a set number of chars every loop */
 /* ----------------------------------------------------------------------------- */
-void IOManager_Class::Transmit(){}
-  
+void IOManager_Class::Transmit(){
+  /* If locked, transmit until end of message then unlock */
+  if (_tx_locked){
+
+    serial_handle->println(_tx_buffer);
+    
+    /* Unlock */
+    _tx_locked = false;
+  }
+}
+
 
 
 /* ----------------------------------------------------------------------------- */
@@ -223,11 +236,24 @@ void IOManager_Class::Append(PropertyList *plist){
 /* ----------------------------------------------------------------------------- */
 /* Testing for funz */
 /* ----------------------------------------------------------------------------- */
-String IOManager_Class::Test(int i, int index, int verbose){
+String IOManager_Class::Test(int i, int index, int verbose){   
+  serial_handle->println("setting flag: ");
+  SetFlag(i, index);
+  serial_handle->print("checking flag: ");
+  serial_handle->println(plist_array[i]->CheckFlag(index));
+  serial_handle->print("plist_index: ");
+  serial_handle->println(plist_index);
+  serial_handle->print("list_index: ");
+  serial_handle->println((int)plist_array[i]->Size());
+  serial_handle->println("Transmitting");
   String out  = plist_array[i]->Get(index, verbose);
-  serial_handle->println(out);
+  _tx_buffer = out;
+  _tx_locked = true;
+  Transmit();
+  serial_handle->print("checking flag again: ");
+  serial_handle->println(plist_array[i]->CheckFlag(index));
   return out;
-}
+ }
 
 /* ----------------------------------------------------------------------------- */
 /* Parse input buffer and handle requests */
@@ -273,11 +299,30 @@ void IOManager_Class::HandleInput(){
 
 /* ----------------------------------------------------------------------------- */
 /* 
-   Handle Requests, checks List and PropertyList get flags to and if _tx_lock is
-   false, sets output buffer equivalent to Property output String 
+   Handle Requests, checks if _tx_locked, thenchecks List and PropertyList get 
+   flags to and if _tx_lock is false, sets output buffer equivalent to Property 
+   output String 
 */
 /* ----------------------------------------------------------------------------- */
-void IOManager_Class::HandleRequests(){};
+void IOManager_Class::HandleRequests(){
+  
+  if (!_tx_locked){
+    int i = 0;
+    Test(i, 0, 1);
+    Test(i, 1, 1);
+    Test(i, 2, 1);
+    Test(i, 3, 1);
+    Test(i, 4, 1);
+    Test(i, 5, 1);
+
+    Test(i+1, 0, 1);
+    Test(i+1, 1, 1);
+
+
+
+  }
+  return;
+};
 
 /* ----------------------------------------------------------------------------- */
 /* Run all processes necessary per cycle */
@@ -286,6 +331,7 @@ void IOManager_Class::Loop(){
   Receive();
   HandleInput();
   HandleRequests();
+  Transmit();
   return;
 }
 

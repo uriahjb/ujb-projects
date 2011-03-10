@@ -67,7 +67,7 @@ class PropertyList {
   String list_name;
   int current_index;
   int num_properties;
-  int get_flag;
+  int get_request_flag;
   
   /* Declare property_list */
   property_t *property_list;
@@ -78,6 +78,9 @@ class PropertyList {
   int Set(int index, void *data);
   String Get(int index, int verbose);
 
+  void SetFlag(int index);
+  int CheckFlag(int index);
+  int Size();
 };
 
 #endif

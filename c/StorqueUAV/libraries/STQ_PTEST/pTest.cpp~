@@ -1,0 +1,10 @@
+/* CPP tester */
+
+#include "WProgram.h"
+#include "pTest.h"
+
+pTest_Class::pTest_Class(): p(3, "Test") {};
+
+void pTest_Class::Init(){
+  
+  a = (int*)malloc(num_lists*sizeof(PropertyList*));

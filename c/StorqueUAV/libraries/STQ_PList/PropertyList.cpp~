@@ -45,6 +45,15 @@ PropertyList::PropertyList(int n, String name){
   property_list = (property_t*)malloc(n*sizeof(property_t));
   num_properties = n;
   list_name = name;
+  current_index = 0;
+  get_request_flag = false;
+  
+  /* Initialize relevant property values */
+  int i;
+  for (i = 0; i < n; ++i){
+    property_list[i].flag = 0;
+    property_list[i].initialized = false;
+  }
 }
 
 /* ------------------------------------------------------------------------ */
@@ -59,6 +68,7 @@ int PropertyList::Set(int index, int type, int length, void *data, char *name){
 
   /* Check if property has been initialized */
   if (property_list[index].initialized == false){
+    ++current_index;
     property_list[index].initialized = true;
   }
 
@@ -119,20 +129,21 @@ String PropertyList::Get(int index, int verbose){
     return str_error;
   }
 
+  /* Clear Get Flag */
+  property_list[index].flag = false; 
 
   property_t *pl = property_list;
-  
+
   int type;
   int length;
   int i;
   
   String str_space = String(" ");
-  /* If verbose. Start with list name and then append item name */
-
 
   String str_out = String(list_name);
   str_out += str_space;  
 
+  /* If verbose. Start with list name and then append item name */
   if (verbose){
     str_out += String((char*)pl[index].name);
     str_out += str_space;
@@ -226,4 +237,33 @@ String PropertyList::Get(int index, int verbose){
   /* End Switch */
     
   return str_out;
+}
+
+/* 
+   Set get request flag for given property ...
+     also make sure that entire list request
+     flag is set
+*/
+void PropertyList::SetFlag(int index){
+  if (index < current_index){
+    property_list[index].flag = true;
+    if (get_request_flag == false){
+      get_request_flag = true;
+    }
+  }
+  return;
+}
+
+/* Check get flag for a given property */
+int PropertyList::CheckFlag(int index){
+  if (index < current_index){
+    if (property_list[index].flag){
+      return true;
+    }
+  }
+  return false;
+};
+
+int PropertyList::Size(){
+  return current_index;
 }

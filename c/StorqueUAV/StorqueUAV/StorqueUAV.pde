@@ -139,6 +139,7 @@
 
 #include <PropertyList.h>
 #include <IOManager.h>
+#include <pTest.h>
 
 // EEPROM storage for user configurable values
 #include <EEPROM.h>
@@ -198,6 +199,26 @@ void setup()
 
   /* Initialize Communication with Host */
   /* And all other functions / sensors */
+  IOManager.Init(5, &Serial);
+  pTest.Init();
+  
+   /* -------------------------------------------------------- */
+  /* Test out IOManager / PropertyList */
+  /* -------------------------------------------------------- */
+ 
+  /* Testing PropertyList */
+  /*
+  PropertyList p(3, "Test");  
+  
+  int a[3] = {1, 2, 3};
+  char b = 'b';
+  
+  p.Set(0, Int, 3, &a, "num"); 
+  p.Set(1, Char, 1, &b, "b"); 
+    
+  IOManager.Append(&p);
+  */
+  
   Com_Init();
   IMU_Init();
   Console_Init();
@@ -206,40 +227,21 @@ void setup()
   RC_Input_Init();
   motorArmed = 0;
   
-  /* -------------------------------------------------------- */
-  /* Test out IOManager / PropertyList */
-  /* -------------------------------------------------------- */
-  String output;  
-  IOManager.Init(5, &Serial);
+/*
+  IOManager.Test(0, 0, 1);
+  IOManager.Test(0, 1, 1);
+  IOManager.Test(0, 2, 1);
+  IOManager.Test(0, 3, 1);
+  IOManager.Test(0, 4, 1);
+  IOManager.Test(0, 5, 1);
   
-    /* Testing PropertyList */
-  PropertyList p(3, "Test");  
-  
-  int a[3] = {1, 2, 3};
-  char b = 'b';
-  
-  p.Set(0, Int, 3, &a, "num"); //with name
-  ftdiPrintln(p.current_index);
-  p.Set(1, Char, 1, &b, "b"); // without name
-  ftdiPrintln(p.current_index);
-  p.SetFlag(0);
-  ftdiPrintln(p.CheckFlag(0));
-  p.SetFlag(1);
-  ftdiPrintln(p.CheckFlag(1));
-  
-  IOManager.Append(&p);
-  
-  output = IOManager.Test(0, 0, 1);
-  output = IOManager.Test(0, 1, 1);
-  output = IOManager.Test(0, 2, 1);
-  output = IOManager.Test(0, 3, 1);
-  output = IOManager.Test(0, 4, 1);
-  
-  output = IOManager.Test(1, 0, 0);
-  output = IOManager.Test(1, 1, 0);
-  
+  IOManager.Test(1, 0, 0);
+  IOManager.Test(1, 1, 0);
+*/
+  /*
   ftdiPrintln(p.CheckFlag(0));
   ftdiPrintln(p.CheckFlag(1));
+  */
   /* 
   String hello = String("hello");
   ftdiPrintln(hello[0]);
