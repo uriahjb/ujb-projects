@@ -1,0 +1,35 @@
+# An interface for communicating with a bus of HiTech servos through serial
+
+import serial
+import sys, os, time
+
+class servoControl(object):
+
+    def __init__(self, com):
+                # Set up serial with parameters defined by HiTech
+        print 'Initializing Servo Communications'
+
+        self.ser = serial.Serial(com)
+        self.ser.baudrate = 19200
+        self.ser.stopbits = 2
+        self.ser.parity = 'N'
+
+        self.commands = {                           \
+                        "Read EEPROM"    : 0xE1,    \
+                        "Write EEPROM"   : 0xE2,    \
+                        "Read Memory"    : 0xE3,    \
+                        "Write Memory"   : 0xE4,    \
+                        "Read Position"  : 0xE5,    \
+                        "Set Position"   : 0xE6,    \
+                        "Read ID"        : 0xE7,    \ # This also gets the Version
+                        "Read Voltage"   : 0xE8,    \ # This also gets Pulsewidth
+                        "Set Speed"      : 0xE9,    \ # This also returns pos
+                        "Cntrl Param"    : 0xEA,    \
+                        "Go/Stop"        : 0xEB,    \
+                        "Release"        : 0xEF,    \
+                        }
+    
+         # Storing EEPROM | name | value | address(s)|
+         self.EEPROM = {
+                       "P-Gain" : pgain : [0x00 0x01], \
+                       "Dead-Zone" : 
