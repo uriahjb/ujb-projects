@@ -68,7 +68,7 @@ class IOManager_Class {
   unsigned int _rx_len;
   unsigned int _rx_index;
   unsigned int _rx_complete_flag;
-  char *_rx_buffer;
+  String _rx_buffer;
   
  public:
   
@@ -95,17 +95,22 @@ class IOManager_Class {
   HardwareSerial *serial_handle;
 
   /* ----------------------------------------------------------------------------- */
+  /* Constructor */
+  /* ----------------------------------------------------------------------------- */
+  IOManager_Class();
+
+  /* ----------------------------------------------------------------------------- */
   /* Low Level Methods */
   /* ----------------------------------------------------------------------------- */
   void Receive();
   void Transmit();
+  void Set(int i, int index);
   void SetFlag(int list_index, int property_index);
   int CheckFlag(int list_index);
 
   /* ----------------------------------------------------------------------------- */
   /* High Level Methods */
   /* ----------------------------------------------------------------------------- */
-  IOManager_Class();
   void Init(int, HardwareSerial *serialObj);
   void Append(PropertyList *plist);
 

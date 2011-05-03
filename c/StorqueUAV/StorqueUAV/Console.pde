@@ -57,6 +57,7 @@
 #define RANGEFINDER_DATA         0x53
 #define RANGEFINDER_PROPERTIES   0x54
 #define RC_INPUT_DATA            0x55
+#define BATTERY_VOLTAGE_DATA     0x56
 
 /* ------------------------------------------------------------------------------------ */
 /* Init Console:
@@ -70,11 +71,13 @@ void Console_Init(){
     console.imu_print_data_flag = false;
     console.rangefinder_print_data_flag = false;
     console.rc_input_print_data_flag = false;
+    console.battery_print_data_flag = false;
 
     console.heartbeat_period = 1000;
     console.rc_input_print_data_period = 200;
     console.imu_print_data_period = 100; // real update rate is 125 Hz, this is 5 Hz
     console.rangefinder_print_data_period = 500; //500; // half of current update rate
+    console.battery_print_data_period = 500; //500; // half of current update rate
     
     return;
 }
@@ -297,6 +300,10 @@ uint8_t console_write_packet(uint8_t command){
           
         case RC_INPUT_DATA:
           RC_Input_Print(DATA);
+          break;
+          
+        case BATTERY_VOLTAGE_DATA:
+          BatteryVoltage_Print(DATA);
           break;
           
      }

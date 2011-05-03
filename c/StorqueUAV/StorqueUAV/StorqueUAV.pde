@@ -153,6 +153,7 @@
 #include "IMU.h"
 #include "RangeFinder.h"
 #include "RC_Input.h"
+#include "BatteryVoltage.h"
 
 /* Software version */
 #define VER 0.2    // Current software version (only numeric values)
@@ -199,55 +200,26 @@ void setup()
 
   /* Initialize Communication with Host */
   /* And all other functions / sensors */
-  IOManager.Init(5, &Serial);
+  /*IOManager.Init(5, &Serial);
   pTest.Init();
-  
-   /* -------------------------------------------------------- */
-  /* Test out IOManager / PropertyList */
-  /* -------------------------------------------------------- */
- 
-  /* Testing PropertyList */
-  /*
-  PropertyList p(3, "Test");  
-  
-  int a[3] = {1, 2, 3};
-  char b = 'b';
-  
-  p.Set(0, Int, 3, &a, "num"); 
-  p.Set(1, Char, 1, &b, "b"); 
-    
-  IOManager.Append(&p);
+  IOManager.SetFlag(0, 0);
+  IOManager.SetFlag(0, 1);
+  IOManager.SetFlag(0, 2);
+  IOManager.SetFlag(0, 3);
+  IOManager.SetFlag(0, 4);
+  IOManager.SetFlag(0, 5);
+  IOManager.SetFlag(1, 0);
+  IOManager.SetFlag(1, 1);
   */
-  
   Com_Init();
   IMU_Init();
   Console_Init();
   AttitudePID_Init();
   RangeFinder_Init();
   RC_Input_Init();
+  BatteryVoltage_Init();
   motorArmed = 0;
-  
-/*
-  IOManager.Test(0, 0, 1);
-  IOManager.Test(0, 1, 1);
-  IOManager.Test(0, 2, 1);
-  IOManager.Test(0, 3, 1);
-  IOManager.Test(0, 4, 1);
-  IOManager.Test(0, 5, 1);
-  
-  IOManager.Test(1, 0, 0);
-  IOManager.Test(1, 1, 0);
-*/
-  /*
-  ftdiPrintln(p.CheckFlag(0));
-  ftdiPrintln(p.CheckFlag(1));
-  */
-  /* 
-  String hello = String("hello");
-  ftdiPrintln(hello[0]);
-  ftdiPrintln(hello[1]);
-  ftdiPrintln(hello[2]);
-  */
+
 } 
 
 
@@ -265,14 +237,12 @@ void loop(){
     digitalWrite(LOOP_PIN, LOW);
   }
   
-  IOManager.Loop();
+  /*IOManager.Loop();*/
   
-  /*
   Read_Ports();
   Read_Timers();
   Manage_Tasks();
   Write_Ports();
-  */
 }   // End of void loop()
 
 // END of StorqueUAV.pde

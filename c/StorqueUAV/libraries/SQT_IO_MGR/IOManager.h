@@ -66,12 +66,16 @@ class IOManager_Class {
   /* Low level receive buffer, uses chars (uint8_t) for ease of use */
   unsigned int _rx_cmd;
   unsigned int _rx_len;
-  unsigned int _rx_index;
   unsigned int _rx_complete_flag;
-  char *_rx_buffer;
+  int _rx_index;
+  String _rx_buffer;
+  String _rx_data;
+
+  /* Input Parsing Method */
+  int _parseInput();
   
  public:
-
+  
   /* Property List Array ... currently with fixed number of propertylists */
   int plist_index;
   int plist_size;
@@ -95,17 +99,26 @@ class IOManager_Class {
   HardwareSerial *serial_handle;
 
   /* ----------------------------------------------------------------------------- */
+  /* Constructor */
+  /* ----------------------------------------------------------------------------- */
+  IOManager_Class();
+
+  /* ----------------------------------------------------------------------------- */
   /* Low Level Methods */
   /* ----------------------------------------------------------------------------- */
   void Receive();
   void Transmit();
+
+  void SetProperty(int i, int index);
+  void GetProperty();
+  void GetAllProperties();
+
   void SetFlag(int list_index, int property_index);
   int CheckFlag(int list_index);
 
   /* ----------------------------------------------------------------------------- */
   /* High Level Methods */
   /* ----------------------------------------------------------------------------- */
-  IOManager_Class();
   void Init(int, HardwareSerial *serialObj);
   void Append(PropertyList *plist);
 
@@ -114,7 +127,6 @@ class IOManager_Class {
   void HandleInput();
   void HandleRequests();
   void Loop();
-
 
 };
 

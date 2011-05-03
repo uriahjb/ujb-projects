@@ -59,9 +59,7 @@ void IOManager_Class::Init(int num_lists, HardwareSerial *serialObj){
   timer_period2 = 0;
   timer_period3 = 0;
 
-  /* Allocated memory for _rx_buffer */
-  char rx_buffer[RX_BUFFER_SIZE]; 
-  _rx_buffer = rx_buffer;
+  _rx_buffer = "";
   _rx_len = 0;
   
   /* Set up transmit */
@@ -112,74 +110,21 @@ void IOManager_Class::Receive(){
   
   char input = serial_handle->read();
 
-  if (_rx_index == 0){
-    if (input == 'i'){
-      serial_handle->println(input);
-      ++_rx_index;
-    }else{
-      _rx_index = 0;
-    }
-    return;
-  }
-
-  if (_rx_index == 1){
-    if (input == 'n'){
-      serial_handle->println(input);
-      ++_rx_index;
-    }else{
-      _rx_index = 0;
-    }
-    return;
-  }
-
-  if (_rx_index == 2){
-    if (input == 'p'){
-      serial_handle->println(input);
-      ++_rx_index;
-    }else{
-      _rx_index = 0;
-    }
-    return;
-  }
-
-  if (_rx_index == 3){
-    serial_handle->println(input);
-    _rx_cmd = input;
-    ++_rx_index;
-    return;
-  }
-
-  if (_rx_index == 4){
-    /* Set expected input length */
-    if (input < RX_BUFFER_SIZE){
-      serial_handle->println((uint16_t)input);
-      /* If data length is zero */
-      if (input == 0){
-        _rx_complete_flag = true;
-	_rx_index = 0;
-	return;
-      }
-      _rx_len = input;
-      ++_rx_index;
-    }else{
-      _rx_index = 0;
-    }
-    return;
-  }
-
-  /* Set buffer equivalent to input until end of data */
-  if ((_rx_index - 5) < _rx_len){
-   serial_handle->println(input);
-   serial_handle->println(_rx_index);
-   _rx_buffer[_rx_index - 5] = input;
-   ++_rx_index;
-  }
-
-  /* At end of data set _rx_complete_flag to true */
-  if ((_rx_index - 5) == _rx_len){
-    _rx_complete_flag = true;
+  /* If newline then message complete */
+  if (input == '\n'){
+    _rx_buffer += input;
     _rx_index = 0;
-  } 
+    serial_handle->println("Message complete");
+    _rx_complete_flag = true;
+  }else{
+    if (_rx_index < RX_BUFFER_SIZE){
+      _rx_buffer += input;
+    }else{
+      /* Message receive fail */
+      _rx_buffer = "";
+      _rx_index = 0;
+    }
+  }          
   return;
 }
     
@@ -191,12 +136,21 @@ void IOManager_Class::Receive(){
 void IOManager_Class::Transmit(){
   /* If locked, transmit until end of message then unlock */
   if (_tx_locked){
-
-    serial_handle->println(_tx_buffer);
-    
-    /* Unlock */
-    _tx_locked = false;
+    int i;
+    for (i = 0; i < transmit_length; ++i){      
+      if ((_tx_index + i) == _tx_buffer.length()){
+	// Reset index and unlock
+	serial_handle->println();
+	_tx_index = 0;
+	_tx_locked = false;
+	return;
+      }else{
+	serial_handle->print(_tx_buffer[_tx_index + i]);
+      }        
+    }
+    _tx_index += transmit_length;
   }
+  return;
 }
 
 
@@ -215,7 +169,7 @@ void IOManager_Class::SetFlag(int list_index, int property_index){
 /* ----------------------------------------------------------------------------- */
 int IOManager_Class::CheckFlag(int list_index){
   if (list_index < plist_index){
-    if (plist_array[list_index]->get_request_flag){
+    if ((plist_array[list_index]->num_requests) > 0){
       return true;
     }
   }
@@ -256,7 +210,117 @@ String IOManager_Class::Test(int i, int index, int verbose){
  }
 
 /* ----------------------------------------------------------------------------- */
-/* Parse input buffer and handle requests */
+/* Parse Input Buffer  
+     - Expects:
+        i,n,p,len,data,\n
+
+*/
+/* ----------------------------------------------------------------------------- */
+int IOManager_Class::_parseInput(){
+  serial_handle->println("Parsing Input");
+  
+  int index = 0;     
+  int meta = false;
+  int meta_index = 0; // These are for '_' chars
+  int rx_len = 0;
+  int len_index = 0;
+  char current_char = 0;
+  _rx_data = "";
+
+  while(current_char != '\n'){
+    current_char = _rx_buffer[index];
+
+    if (index == 0){
+      if (current_char != 'i'){
+	return 0;
+      }
+    }
+
+    if (index == 1){
+      if (current_char != 'n'){
+	return 0;
+      }
+    }
+
+    if (index == 2){
+      if (current_char != 'p'){
+	return 0;
+      }
+    }
+
+    if (index == 3){
+      if (current_char != '_'){
+	return 0;
+      }else{
+	meta = true;
+      }
+    }
+
+    // Get Command
+    if ((index == 4) && (meta_index == 1)){
+      _rx_cmd = current_char;
+    }
+    
+    if (index == 5){
+      if (current_char != '_'){
+	return 0;
+      }else{
+	meta = true;;
+      }
+    }
+
+    // Get Length
+    if (meta_index == 2){
+      if (current_char == '_'){
+	meta = true;
+      }else if (current_char == '\n'){    // This might be iffy
+	if (rx_len == (index - meta_index - 5)){
+	  return 1;
+	}else{
+	  return 0;
+	}
+      }else{	
+	serial_handle->println("len_index");
+	serial_handle->println(len_index);
+	// Convert string to int */
+      	rx_len = (current_char - '0') + rx_len*10;
+	serial_handle->println(rx_len);
+	++len_index;	
+      }
+    }
+
+    if (meta_index > 2){
+      if (current_char == '_'){
+	++meta_index;
+      }
+      _rx_data += current_char;
+    }
+
+    if (current_char == '\n'){
+      
+      if (rx_len == (index - meta_index - 5)){
+	return 1;
+      }else{
+        return 0;
+      }
+    }
+
+    // Increment meta_index meta is found
+    if (meta){
+      ++meta_index;
+      meta = false;
+    }
+    
+    ++index;
+	
+  }
+
+  return 1;
+
+}  
+
+/* ----------------------------------------------------------------------------- */
+/* Handle requests */
 /*   Input arguements are defined as follows:
             
        - Get:    'g' | PropertyList Index | Property Index
@@ -266,34 +330,123 @@ String IOManager_Class::Test(int i, int index, int verbose){
 */     
 /* ----------------------------------------------------------------------------- */
 void IOManager_Class::HandleInput(){
+
   if (!_rx_complete_flag){
     return;
   }
+  _rx_complete_flag = false;
 
-  /* Handle a single get command by setting output flag*/
+  int parsing_success = _parseInput();
+  /* This probably isn't the best place to do this */
+  _rx_buffer = ""; 
+
+  if (parsing_success){ 
+    serial_handle->println("Parsing success");
+  }else{
+    serial_handle->println("Parsing Fail");
+    return;
+  }
+
+  int k;
+  for (k = 0; k < _rx_data.length(); ++k){
+    Serial.print(_rx_data[k]);
+  }
+  Serial.println();
+
+  // Handle Receive Commands
   if (_rx_cmd == 'g'){
-    char list_index = _rx_buffer[0];
-    char property_index = _rx_buffer[1];
-
-    // some debugging fun
-    serial_handle->println("Get Command");
-    serial_handle->println("list index");
-    serial_handle->println((uint16_t)list_index);
-    serial_handle->println("property index");
-    serial_handle->println((uint16_t)property_index);
-
-    SetFlag(list_index, property_index);
+    serial_handle->println("Getting property");
+    GetProperty();
+  }
+  if (_rx_cmd == 'a'){
+    GetAllProperties();    
+  }
+  /*
+  if (_rx_cmd == 's'){
+    Set(_rx_buffer[0], _rx_buffer[1]);
   }
     
-  /* More debugging fun */   
+  // More debugging fun ... prints entire input buffer
   serial_handle->println("Input complete");
   int i;
   for (i = 0; i < _rx_len; ++i){
     serial_handle->print((uint16_t)_rx_buffer[i]);
   }
   serial_handle->println();
-      
-  _rx_complete_flag = false;
+  */
+
+  return;
+}
+
+/* ----------------------------------------------------------------------------- */
+/* Set the request flag for a Property Get request */
+/* ----------------------------------------------------------------------------- */
+void IOManager_Class::GetProperty(){
+  // Set a single request flag
+
+  int i = 0;
+  int meta = false;
+  int meta_index = 0;
+  char current_char = 0;
+  int list_index = 0;
+  int property_index = 0;
+
+  while(current_char != '\n'){
+    current_char = _rx_data[i];
+    if (meta_index == 0){
+      if (current_char == '_'){
+	meta = true;
+      }else if (current_char == '\n'){
+	return;	
+      }else{
+	list_index = (current_char - '0') + list_index*10;      	
+	serial_handle->println(list_index);
+      }
+    }
+    if (meta_index == 1){
+      if (current_char == '_'){
+	return;
+      }else if (current_char == '\n'){
+	  /* Don't anything, just index forward ... out of the while */
+      }else{
+	property_index = (current_char - '0') + property_index*10;
+	serial_handle->println(property_index);    
+      }
+    }
+   
+    if (meta){
+      ++meta_index;
+      meta = false;
+    }
+    ++i;
+  }
+
+  serial_handle->println(list_index);
+  serial_handle->println(property_index);    
+  SetFlag(list_index, property_index);
+}
+
+/* ----------------------------------------------------------------------------- */
+/* Set the request flag for a Properties Get All request */
+/* ----------------------------------------------------------------------------- */
+void IOManager_Class::GetAllProperties(){
+  // Set all request flags
+  int i;
+  int j;
+  for (i = 0; i < plist_index; ++i){
+    for (j = 0; j < plist_array[i]->Size(); ++j){
+      SetFlag(i, j);
+    }
+  }
+}
+
+/* ----------------------------------------------------------------------------- */
+/* Set value in property list in property list array */
+/* ----------------------------------------------------------------------------- */
+void IOManager_Class::SetProperty(int i, int index){
+  if (i < plist_index){
+    plist_array[i]->_Set(index, _rx_len,  _rx_buffer);
+  }
   return;
 }
 
@@ -305,22 +458,30 @@ void IOManager_Class::HandleInput(){
 */
 /* ----------------------------------------------------------------------------- */
 void IOManager_Class::HandleRequests(){
-  
+
   if (!_tx_locked){
-    int i = 0;
-    Test(i, 0, 1);
-    Test(i, 1, 1);
-    Test(i, 2, 1);
-    Test(i, 3, 1);
-    Test(i, 4, 1);
-    Test(i, 5, 1);
+    /* Check to see if any lists have requests */
+    int i;
+    for (i = 0; i < plist_index; ++i){
+      if (CheckFlag(i)){
+	int j;
+	for (j = 0; j < plist_array[i]->Size(); ++j){
+	  if (plist_array[i]->CheckFlag(j)){
 
-    Test(i+1, 0, 1);
-    Test(i+1, 1, 1);
-
-
-
+	    serial_handle->println("Transmitting");
+	    int verbose = true;
+	    String out = plist_array[i]->Get(j, verbose);	   
+	    _tx_buffer = out;
+	    serial_handle->println("tx Length");
+	    serial_handle->println(_tx_buffer.length());
+	    _tx_locked = true;
+	    return;
+	  }
+	}
+      }
+    }
   }
+
   return;
 };
 

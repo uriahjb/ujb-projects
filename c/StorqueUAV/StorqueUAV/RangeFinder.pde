@@ -46,11 +46,7 @@ void RangeFinder_Init(){
 void RangeFinder_Read(){
   
   rangefinder.range = analogRead(RANGEFINDER_PIN);
-  
-  /* Note: rangefinder read should probably be in the timer, and should set a flag to
-     update the controls ... or better yet, maybe sensor reads (timer and serial) 
-     should be abstracted to a ReadSensors() function TODO */
-  
+    
   return;
   
 }

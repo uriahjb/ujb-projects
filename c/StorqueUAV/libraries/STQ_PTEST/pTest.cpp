@@ -8,12 +8,12 @@ pTest_Class::pTest_Class(): p(3, "Test") {};
 
 void pTest_Class::Init(){
 
-  /*
-  int len_a = 3;
-  a = (int*)malloc(len_a*sizeof(int));
+  /* This doesn't seem to work as I would like ... need to fix
+  a = (int*)malloc(3*sizeof(int));
+  
   a[0] = 1;
-  a[1] = 1;
-  a[2] = 2;
+  a[1] = 2;
+  a[2] = 3;
   */
 
   a = 1;

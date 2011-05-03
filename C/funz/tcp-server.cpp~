@@ -1,6 +1,0 @@
-/* ------------------------------------------------------------------ */
-/* A test server written in c++ ... hopefully eventually this will
-   be ported to a tcp/udp server class that simplifies the process
-   of implementing a simple server interface
-*/
-/* ------------------------------------------------------------------ */

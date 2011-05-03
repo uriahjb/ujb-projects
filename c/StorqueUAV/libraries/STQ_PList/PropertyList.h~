@@ -65,9 +65,9 @@ class PropertyList {
   } property_t;
   
   String list_name;
-  int current_index;
+  int list_index;
   int num_properties;
-  int get_request_flag;
+  int num_requests;
   
   /* Declare property_list */
   property_t *property_list;
