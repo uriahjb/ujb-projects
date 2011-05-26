@@ -1,0 +1,33 @@
+%% A function to control Prof. Fiene's robot to track an object on its
+%% camera
+%   by: Uriah Baalke
+
+function tld = bot_control(tld, i)
+
+
+    % Create robot interface if it does not already exist
+    if ~isfield(tld, 'bot')
+        bot_name = 'light';
+        serial_name = '/dev/tty.usbmodem411';
+        instrreset
+        tld.bot = open_robot(serial_name, bot_name);
+    end
+    
+    % Control robot to center its view on the tld bb
+    %disp(bb_center(tld.bb(:,tld.source.idx(i))));    
+    
+    img = tld.img{i}.input;
+    [H,W] = size(img);
+    
+    center = bb_center(tld.bb(:,tld.source.idx(i))) - [W; H]/2;    
+    
+    if ~isnan(center(1)) && ~isnan(center(2))
+        disp(center);
+        
+        w_l = (v_cmd - w_cmd);
+        w_r = (v_cmd + (robot.width/2)*w_cmd);
+
+        
+end
+    
+    

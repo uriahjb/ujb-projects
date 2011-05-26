@@ -21,7 +21,6 @@
 %  designed by Prof. Fiene.
 
 addpath(genpath('~/TLD/OpenTLD'))
-addpath('~/Desktop/MEAM520/Seek/Real/');
 
 % A hack -U
 imwrite(imread('http://127.0.01:8888'), ['_bot/' num2str(1,'%05d') '.png']);
@@ -49,7 +48,7 @@ opt.control         = struct('maxbbox',maxbbox,'update_detector',update_detector
         
 % Run TLD -----------------------------------------------------------------
 %profile on;
-[bb,conf] = tldBot(opt);
+%[bb,conf] = tldBot(opt);
 %profile off;
 %profile viewer;
 
