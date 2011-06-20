@@ -149,7 +149,7 @@ classdef UDPRPC < mbed.RPCConnection
                 %   response, otherwise don't bother, it consumes too 
                 %   much time
                 
-                disp(method);                
+                %disp(method);                
                 if ~isempty(strfind(method, 'new')) || ...
                    ~isempty(strfind(method, 'read'))
                     response = '';

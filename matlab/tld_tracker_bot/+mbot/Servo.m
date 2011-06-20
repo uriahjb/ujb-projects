@@ -32,7 +32,11 @@ classdef Servo < handle
             obj.lower_limit = lower_limit;
             obj.upper_limit = upper_limit;   
             obj.upper_pwm = obj.upper_limit - obj.zero;
-            obj.lower_pwm = obj.zero - obj.lower_limit;            
+            obj.lower_pwm = obj.zero - obj.lower_limit; 
+            
+            % Init pos and velocity
+            obj.pos = 0;
+            obj.velocity = 0;
             
             % Set up period and pulsewidth corresponding to zero_pos
             pause(0.05);
@@ -44,14 +48,14 @@ classdef Servo < handle
         function out = limit(obj, pos)
             % Safety limit function
             if pos > 0              
-                pos = (obj.upper_pwm - obj.zero)*(pos) + obj.zero;
+                pos = -(obj.upper_pwm - obj.zero)*(pos/2) + obj.zero;
                 if pos > obj.upper_limit
                     out = obj.upper_limit; 
                     return
                 end
             end
             if pos < 0              
-                pos = (obj.zero - obj.lower_pwm)*(pos) + obj.zero;
+                pos = (obj.zero - obj.lower_pwm)*(pos/2) + obj.zero;
                 if pos < obj.lower_limit
                     out = obj.lower_limit;                    
                     return
@@ -66,6 +70,12 @@ classdef Servo < handle
         
         function pos_pw = set_pos(obj, pos)
             % Set position from range of -1 (-90 deg) to 1 (90 deg)            
+            if pos > 1
+                pos = 1;
+            elseif pos < -1
+                pos = -1;
+            end
+            obj.pos = pos;
             pos_pw = obj.limit(pos); 
             % Send pulsewidth command
             obj.pwm_cmd = pos_pw;            
@@ -73,6 +83,7 @@ classdef Servo < handle
         
         function vel_pw = set_velocity(obj, velocity)
             % Set velocity ... kinda
+            obj.velocity = velocity;
             vel_pw = (obj.upper_limit - obj.lower_limit)*velocity;            
             obj.velocity = vel_pw;
         end
@@ -91,7 +102,7 @@ classdef Servo < handle
                 obj.pwm_cmd = obj.lower_limit;
             end
             
-            obj.pin_handle.pulsewidth(obj.pwm_cmd)
+            obj.pin_handle.pulsewidth(obj.pwm_cmd);
         end
         
     end    
