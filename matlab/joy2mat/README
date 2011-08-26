@@ -1,17 +1,17 @@
-The purpose of joy2mat is to serve as an interface between the 3dconnection 
-mouse and matlab, in particular on OSX, and in general on any operating system
-supported by 3dconnection. 
+The purpose of joy2mat is to provide a matlab joystick interface using
+pygame. In particular joy2mat was written to provide a matlab based
+SpaceNavigator ( 3dConnexion ) interface for OSX. 
 
 Dependencies:
-  matlab
+  matlab2009 or higher
   python2.6 or higher
   pygame
 
-Usage:
+Use:
   In a console:
   python joy2mat.py
 
-  In matlab:
+  Then in matlab:
   j = joystick
   j.pull  # Returns a single joystick event struct
   j.pullall # Returns all of the current joystick events in a struct 
