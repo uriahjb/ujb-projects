@@ -1,5 +1,7 @@
 """
-A canvas wrapper for PyOpenGl
+The widget handling Canvas wrapper for PyOpenGl and PyGame.
+
+Canvas only handles widget objects.
 
 Should eventually have some sweet functionality
 
@@ -8,12 +10,16 @@ Should eventually have some sweet functionality
 import string
 import sys, os
 
+# Import PyGame 
+from pygame import init as pygame_init, quit as pygame_quit, display, event
+from pygame.locals import *
+
+# Import OpenGL 
 try:
     from OpenGL.platform import win32
 except AttributeError:
     pass
 
-from OpenGL.GLUT import*
 from OpenGL.GL import*
 from OpenGL.GLU import*
 
@@ -27,53 +33,54 @@ __author__ = 'Uriah Baalke <uriahjb@gmail.com>'
 
 
 """
-The canvas class has the purpose to serve as wrapper for OpenGL, to handle user inputs,
-and to communicate with GUI objects 
+The Canvas class 
+... some description of its purpose ... 
+... 
+    something similar to, manages a network of gui widgets all within a single window 
+    each with inputs and outputs ... linked to other widgets
+...
 """
-
 class Canvas( object ):
     
-    def __init__( self, width, height, x_pos=200, y_pos=200, name='Default Canvas' ):
+    DISPLAY_MODE = RESIZABLE|OPENGL|DOUBLEBUF
 
-        self.width = width
-        self.height = height
-        self.x_pos = x_pos
-        self.y_pos = y_pos
+    """
+    """
+    def __init__( self, size=(200,200), position=(200,200) \
+                       ,background=(0.0, 0.0, 0.0, 0.0) \
+                       ,name='Default Canvas' ):
+        """
+        """
+        # Size and position attributes
+        self.size = size 
+        self.position = position
+        self.background = background
 
-        # Initialize basic glut properties, etc ...
-        glutInit()
-        glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH)
-        glutInitWindowSize(width, height)
-        glutInitWindowPosition(x_pos, y_pos)
-        # Define reshape callback
-        glutReshapeFunc(self.resize)
-        # Define display callback
-        glutDisplayFunc(self.display)
-        # Define idle callback
-        glutIdleFunc(self.idle)
-        # Initialize window
-        self.window = glutCreateWindow(name)
-        self.setup()
-        glutMainLoop()
+        # Initialize pygame and screen
+        pygame_init()
+        self.resize(*self.size)
+        self.running = True
+        self.run()
 
     def setup( self ):
         """
         A currently very hackish initialization ... should be made so that
         it is more customizable 
         """
-        glClearColor(0.0, 0.0, 0.0, 0.0)
+        glClearColor(*self.background)
         glClearDepth(1.0)
         glDepthFunc(GL_LEQUAL)
-        glEnable(GL_LIGHTING);
-        glEnable(GL_LIGHT0);
+        glEnable(GL_LIGHTING)
+        glEnable(GL_LIGHT0)
+        '''
         ambientLight = [0.2, 0.2, 0.2, 1.0]
         diffuseLight = [0.8, 0.8, 0.8, 1.0]
         specularLight = [0.5, 0.5, 0.5, 1.0]
         lightPos = [0.0, 0.0, -30.0, 1.0]
-        glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
-        glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
-        glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
-        glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
+        glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight)
+        glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight)
+        glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight)
+        glLightfv(GL_LIGHT0, GL_POSITION, lightPos)
         glEnable(GL_LIGHTING)
         glEnable(GL_LIGHT0)
         
@@ -96,18 +103,21 @@ class Canvas( object ):
         glFogf (GL_FOG_START, 10.0)
         glFogf (GL_FOG_END, -1000)
         glClearColor(0.0, 0.0, 0.1, 1.0)
-        
+        '''
         glEnable(GL_DEPTH_TEST)          # Enables Depth Testing
         glShadeModel(GL_SMOOTH)          # Enables smooth color shading
         glMatrixMode(GL_PROJECTION)
-        glLoadIdentity()
+        glLoadIdentity()        
         # Set up perspective view
-        gluPerspective(50.0, float(self.width)/float(self.height), 0.1, 5000.0)
+        gluPerspective(50.0, float(self.size[0])/float(self.size[1]), 0.1, 5000.0)
         # Set up an orthographic view
         #glOrtho(-float(width)/2, float(width)/2, -float(height)/2, float(height)/2, -1.0, 1.0)
         glMatrixMode(GL_MODELVIEW)
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        display.flip() # For interactiveness sake
         return
 
+    '''
     def beginOrtho( self ):
         """
         I get the sense that these are also hacks
@@ -130,30 +140,89 @@ class Canvas( object ):
         glMatrixMode(GL_MODELVIEW)
         glPopMatrix()
         return
-
+    '''
+    
     def resize( self, width, height):
-        self.width = width
-        self.height = height
+        """
+        """
+        self.size = (width, height)
 
-        if height == 0:
-            height = 1
-            
+        # This is painfully hacky, basically just remake the entire screen
+        self.screen = display.set_mode((width, height), self.DISPLAY_MODE)
+        # And reinitialize the GL context, ... ouch
+        self.setup()
+
+        # This is pretty normal
+        if height == 0: height = 1
+
         glViewport(0, 0, width, height)
+        glMatrixMode(GL_PROJECTION)
+        glLoadIdentity()
+        if (width <= height):
+            glOrtho(-5.0, 5.0, -5.0*height/width, 
+               5.0*height/width, -5.0, 5.0)
+        else:
+            glOrtho(-5.0*width/height, 
+                     5.0*width/height, -5.0, 5.0, -5.0, 5.0)
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
-        # Set up perspective view
-        gluPerspective(45.0, float(width)/float(height), 0.1, 100.0)
-        # Set up an orthographic view
-        #glOrtho(-float(width)/2, float(width)/2, -float(height)/2, float(height)/2, 10, -10)
-        glMatrixMode(GL_MODELVIEW)
         return
-    
-    def display( self ):
-        pass
 
-    def idle( self ):
-        pass
+    def _init_scene( self ):
+        """
+        """
+        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
+        glLoadIdentity() 
+        return
+        
+    def draw( self ):
+        """
+        """
+        self._init_scene()
+        # Begin Test
+        self.__draw_quad()
+        # End Test
 
+        display.flip()
+        return
+
+    def __draw_quad( self ):
+        # A quick quad drawer test
+        glBegin(GL_QUADS)
+        glVertex3f(-1.0, 1.0, 0.0)              # Top Left
+        glVertex3f( 1.0, 1.0, 0.0)              # Top Right
+        glVertex3f( 1.0,-1.0, 0.0)              # Bottom Right
+        glVertex3f(-1.0,-1.0, 0.0)
+        glEnd()
+        return
+
+    def handle_events( self ):
+        """Generic event handling
+        """
+        for evnt in event.get():
+            if evnt.type == QUIT:
+                self.quit()                    
+            if evnt.type == VIDEORESIZE:
+                self.resize(*evnt.size)
+
+    def run( self ):
+        """
+        """
+        try:
+            while self.running:
+                self.handle_events()
+                self.draw()
+        except Exception, e:
+            # Some sort of messy exception handling 
+            print e 
+        # Then exit properly 
+        display.quit()
+        pygame_quit()
+
+    def quit( self ):
+        """
+        """
+        self.running = False
     
     
 

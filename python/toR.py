@@ -1,5 +1,5 @@
 '''
-to R. :
+to R :
 '''
 if __name__ == '__build__':
     raise Exception
