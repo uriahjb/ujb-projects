@@ -1,6 +1,6 @@
 %{
 
-  The matlab joystic input. Reads in custom formatted pygame
+  The matlab joystick input. Reads in custom formatted pygame
   event strings and provides a joystick object that outputs
   joystick event structs
 
