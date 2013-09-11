@@ -6,8 +6,6 @@ from time import time as now
 from struct import unpack
 import matplotlib.mlab as mlab
 
-notes_tbl = array([ 16.35, 17.32, 18.35, 19.45, 20.6 , 21.83, 23.12, 24.5, 25.96, 27.5 , 29.14, 30.87])
-
 _,scl = mgrid[1:len(notes_tbl)+1, 1:len(notes_tbl)+1]
 
 
