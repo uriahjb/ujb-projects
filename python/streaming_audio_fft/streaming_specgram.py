@@ -6,8 +6,6 @@ from time import time as now
 from struct import unpack
 import matplotlib.mlab as mlab
 
-_,scl = mgrid[1:len(notes_tbl)+1, 1:len(notes_tbl)+1]
-
 
 # Initialize pyaudio streamer 
 p = pyaudio.PyAudio()
