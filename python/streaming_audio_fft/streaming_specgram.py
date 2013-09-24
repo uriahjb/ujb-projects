@@ -11,7 +11,7 @@ import matplotlib.mlab as mlab
 p = pyaudio.PyAudio()
 
 chunk = 1024
-seconds = 5
+seconds = 3 
 
 stream = p.open(format=pyaudio.paFloat32,
                 channels=1,
@@ -45,9 +45,16 @@ min_fft_val = 0.0
 #ax = fig.add_subplot(111)
 
 first_image = True
-data = []
+data = zeros(window) 
+
+#figure(figsize=(12,8))
 
 while True:
+  try:
+    pass
+  except KeyboardInterrupt:
+    break
+
   new_data = stream.read( chunk )
   new_data = unpack( chunk*'f', new_data )
   if len(data) > window:
@@ -61,7 +68,7 @@ while True:
   if first_image:
     pxx_mod = 10*log10(pxx)
     extent = (bins[0], bins[-1], frq[0], frq[-1])
-    img = imshow( pxx_mod )
+    img = imshow( pxx_mod, origin='lower' )
     ax = img.get_axes()
     ax.set_aspect('auto')
     img.set_extent( extent )
@@ -70,19 +77,6 @@ while True:
 
   pxx_mod = 10*log10(pxx)
   img.set_data( pxx_mod )
+
   draw()
-  #data.append( new_data )
-  #n_samples.append( new_samples )
-  #fft_dat = fft( new_data )/chunk
-  #fft_dat = fft_dat[n_samples2]
-
-  #max_fft_val = max( max(fft_dat), max_fft_val )
-  #min_fft_val = max( min(fft_dat), min_fft_val )
-  #axis( [min(frq), max(frq), min_fft_val, max_fft_val] )
-  
-  #sample += chunk
-  #line.set_xdata( frq )
-  #line.set_ydata( abs(fft_dat) )
-  #draw()
-
 
